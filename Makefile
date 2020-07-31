@@ -1,3 +1,5 @@
+# Code in this file is copied from https://cs.bham.ac.uk/~exr/lectures/opsys/10_11/lectures/os-dev.pdf
+
 C_SOURCES = $(wildcard kernel/*.c drivers/*.c)
 HEADERS = $(wildcard kernel/*.h drivers/*.h)
 
@@ -15,7 +17,7 @@ kernel.bin: kernel/kernel_entry.o ${OBJ}
 	ld -m elf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary
 
 %.o : %.c ${HEADERS}
-	gcc -ffreestanding -m32 -c $< -o $@
+	gcc -fno-pic -ffreestanding -m32 -c $< -o $@
 
 %.o : %.asm
 	nasm $< -f elf -o $@

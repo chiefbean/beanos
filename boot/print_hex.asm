@@ -1,3 +1,5 @@
+; This code is copied from a stack overflow response
+
 print_hex:
   pusha
   mov si, HEX_OUT + 2
