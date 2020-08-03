@@ -13,7 +13,7 @@ KERNEL_OFFSET equ 0x1000
   call print_string
 
   call load_kernel
-  call clear_screen
+;  call clear_screen
   call switch_to_pm
 
   jmp $

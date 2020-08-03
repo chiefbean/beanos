@@ -1,18 +1,37 @@
 //Code in this file is copied from https://cs.bham.ac.uk/~exr/lectures/opsys/10_11/lectures/os-dev.pdf
 
-#define VIDEO_ADDR 0xb8000
-#define MAX_ROWS 25
-#define MAX_COLS 80
-#define WHITE_ON_BLACK 0x0f
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
-#define REG_SCREEN_CTRL 0x3D4
-#define REG_SCREEN_DATA 0x3D5
+#define VGA_ROWS 25
+#define VGA_COLS 80
 
-void print_char(char character, int row, int col, char attribute_byte);
-int get_screen_offset(int col, int row);
-int get_cursor();
-void set_cursor(int offset);
-void print_at(char* message, int col, int row);
+enum vga_color {
+	VGA_COLOR_BLACK = 0,
+	VGA_COLOR_BLUE = 1,
+	VGA_COLOR_GREEN = 2,
+	VGA_COLOR_CYAN = 3,
+	VGA_COLOR_RED = 4,
+	VGA_COLOR_MAGENTA = 5,
+	VGA_COLOR_BROWN = 6,
+	VGA_COLOR_LIGHT_GREY = 7,
+	VGA_COLOR_DARK_GREY = 8,
+	VGA_COLOR_LIGHT_BLUE = 9,
+	VGA_COLOR_LIGHT_GREEN = 10,
+	VGA_COLOR_LIGHT_CYAN = 11,
+	VGA_COLOR_LIGHT_RED = 12,
+	VGA_COLOR_LIGHT_MAGENTA = 13,
+	VGA_COLOR_LIGHT_BROWN = 14,
+	VGA_COLOR_WHITE = 15
+};
+
+static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg);
+static inline uint16_t vga_entry(unsigned char uc, uint8_t color);
+void terminal_initialize();
+void terminal_setcolor(uint8_t color);
+void terminal_putentryat(char c, uint8_t color, size_t x, size_t y);
+void terminal_putchar(char c);
+void print_string(const char* data, size_t size);
 void print(char* message);
-int handle_scrolling(int cursor_offset);
 void clear_screen();

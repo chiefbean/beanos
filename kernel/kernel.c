@@ -3,6 +3,8 @@
 #include "../drivers/screen.h"
 
 void main() {
-    //clear_screen();
-	print_at("Hello", 10,1);
+    terminal_initialize();
+	char* vid = (char*) 0xb8000;
+	*vid = 'X';
+	print("Hello");
 }
