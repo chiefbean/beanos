@@ -8,10 +8,10 @@ OBJ = ${C_SOURCES:.c=.o}
 all: os-image
 
 run: all
-	qemu-system-i386 os-image
+	qemu-system-i386 -kernel os-image
 
-os-image: boot/boot.o kernel/kernel.o
-	i686-elf-gcc -T boot/linker.ld -o $@ -ffreestanding -O2 -nostdlib $< -lgcc
+os-image: boot/boot.o kernel/kernel.o ${OBJ}
+	i686-elf-gcc -T boot/linker.ld -o $@ -ffreestanding -O2 -nostdlib $^ -lgcc
 
 %.o : %.c ${HEADERS}
 	i686-elf-gcc -ffreestanding -c $< -o $@ -std=gnu99 -O2 -Wall -Wextra
