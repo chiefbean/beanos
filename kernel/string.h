@@ -1,3 +1,3 @@
 #include <stddef.h>
 
-size_t strlen(char* data);
+size_t strlen(const char* data);
