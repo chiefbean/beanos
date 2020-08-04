@@ -3,7 +3,7 @@
 #include "../drivers/screen.h"
 #include "string.h"
 
-void main() {
+void kernel_main() {
     terminal_initialize();
 	//terminal_write("Hello", 5);
 	//terminal_putchar('A');

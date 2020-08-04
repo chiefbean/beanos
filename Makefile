@@ -10,21 +10,15 @@ all: os-image
 run: all
 	qemu-system-i386 os-image
 
-os-image: boot/boot.bin kernel.bin
-	cat $^ > os-image
-
-kernel.bin: kernel/kernel_entry.o ${OBJ}
-	ld -m elf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary
+os-image: boot/boot.o kernel/kernel.o
+	i686-elf-gcc -T boot/linker.ld -o $@ -ffreestanding -O2 -nostdlib $< -lgcc
 
 %.o : %.c ${HEADERS}
-	gcc -fno-pic -ffreestanding -m32 -c $< -o $@
+	i686-elf-gcc -ffreestanding -c $< -o $@ -std=gnu99 -O2 -Wall -Wextra
 
-%.o : %.asm
-	nasm $< -f elf -o $@
-
-%.bin : %.asm
-	nasm $< -f bin -o $@
+%.o : %.s
+	i686-elf-as $< -o $@
 
 clean:
-	rm -rf *.bin *.o os-image
-	rm -rf kernel/*.o boot/*.bin drivers/*.o
+	rm -rf *.o os-image
+	rm -rf kernel/*.o drivers/*.o
