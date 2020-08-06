@@ -35,4 +35,7 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y);
 void terminal_putchar(char c);
 void terminal_write(const char* data, size_t size);
 void kprint(const char* message);
+void kerror(const char* message);
+void kprint_num(int num, int base);
 void clear_screen();
+void scroll_screen();
