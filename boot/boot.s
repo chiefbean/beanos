@@ -103,7 +103,30 @@ _start:
 	cli
 1:	hlt
 	jmp 1b
- 
+
+.text
+.global loadPageDirectory
+loadPageDirectory:
+	push %ebp
+	mov %esp, %ebp
+	mov 8(%esp), %eax
+	mov %eax, %cr3
+	mov %ebp, %esp
+	pop %ebp
+	ret
+
+.text
+.global enablePaging
+enablePaging:
+	push %ebp
+ 	mov %esp, %ebp
+	mov %cr0, %eax
+	or $0x80000000, %eax
+	mov %eax, %cr0
+	mov %ebp, %esp
+	pop %ebp
+	ret
+
 /*
 Set the size of the _start symbol to the current location '.' minus its start.
 This is useful when debugging or when you implement call tracing.
