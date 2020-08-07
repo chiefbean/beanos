@@ -31,4 +31,4 @@ os-image: $(CRTI) $(CRTBEGIN) boot/boot.o kernel/kernel.o ${OBJ} $(CRTEND) $(CRT
 
 clean:
 	rm -rf *.o os-image
-	rm -rf kernel/*.o drivers/*.o
+	rm -rf kernel/*.o drivers/*.o boot/*.o
