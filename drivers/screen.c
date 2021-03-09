@@ -6,6 +6,7 @@
 
 #include "screen.h"
 #include "../kernel/string.h"
+#include "../kernel/low_level.h"
 
 static const size_t VGA_HEIGHT = 25;
 static const size_t VGA_WIDTH = 80;
@@ -26,6 +27,7 @@ void terminal_initialize() {
 			terminal_buffer[index] = vga_entry(' ', terminal_color);
 		}
 	}
+	enable_cursor(terminal_row, terminal_column);
 }
 
 void terminal_setcolor(uint8_t color) {
@@ -61,6 +63,7 @@ void terminal_write(const char* data, size_t size) {
 
 void kprint(const char* message) {
 	terminal_write(message, strlen(message));
+	update_cursor(terminal_row, terminal_column + 1);
 }
 
 void kprint_num(int num, int base) {
@@ -95,4 +98,21 @@ void scroll_screen() {
 		terminal_buffer[i] = vga_entry(' ', terminal_color);
 	}
 	terminal_row = VGA_HEIGHT-1;
+}
+
+void enable_cursor(uint8_t cursor_start, uint8_t cursor_end) {
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
+
+	outb(0x3D4, 0x0B);
+	outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
+}
+
+void update_cursor(int x, int y) {
+	uint16_t pos = y * VGA_WIDTH + x;
+
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (uint8_t) (pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
 }
