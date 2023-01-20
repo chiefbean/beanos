@@ -1,8 +1,7 @@
 #include "../drivers/screen.h"
 #include "string.h"
 #include "paging.h"
-#include "stack.h"
-#include "queue.h"
+#include "pic.h"
 
 void kernel_main() {
 	enable_paging();
@@ -18,4 +17,9 @@ void kernel_main() {
 	kprint_num(1000000, 10);
 	kprint("\nhex: ");
 	kprint_num(0x3f, 16);
+
+	kprint("Kernel initialized.\n");
+	
+	init_pics(0x20, 0x28);
+	kprint("PICs initialized.\n");
 }
