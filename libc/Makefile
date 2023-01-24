@@ -1,13 +1,14 @@
 CC=i686-elf-gcc
 AS=i686-elf-as
+AR=i686-elf-ar
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
 LDFLAGS?=
 LIBS?=
 
-DESTDIR?=../sysroot
-PREFIX?=/usr/local
+DESTDIR?=
+PREFIX?=/usr
 EXEC_PREFIX?=$(PREFIX)
 INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(EXEC_PREFIX)/lib
@@ -30,9 +31,15 @@ FREEOBJS=\
 $(ARCH_FREEOBJS) \
 string/strlen.o \
 string/itoa.o \
-# stdio/printf.o \
-# stdio/putchar.o \
-# stdio/puts.o \
+sys/io/inb.o \
+sys/io/outb.o \
+sys/io/inw.o \
+sys/io/outw.o \
+kernel/pic.o \
+kernel/paging.o \
+stdio/printf.o \
+stdio/putchar.o \
+stdio/puts.o \
 # stdlib/abort.o \
 # string/memcmp.o \
 # string/memcpy.o \

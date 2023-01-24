@@ -7,10 +7,11 @@ LDFLAGS?=
 LIBS?=
 
 DESTDIR?=../sysroot
-PREFIX?=/usr/local
+PREFIX?=/usr
 EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
+LIBDIR?=$(PREFIX)/lib
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra --sysroot=$(DESTDIR) -isystem=$(INCLUDEDIR)
 CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude
@@ -26,9 +27,9 @@ CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
-KERNEL_OBJS=\
-$(KERNEL_ARCH_OBJS)\
-kernel/kernel.o \
+KERNEL_OBJS=kernel/kernel.o
+KERNEL_OBJS:=$(KERNEL_OBJS) $(KERNEL_ARCH_OBJS)
+
 
 OBJS=\
 $(ARCHDIR)/crti.o \
@@ -42,9 +43,9 @@ $(LDFLAGS) \
 $(ARCHDIR)/crti.o \
 $(ARCHDIR)/crtbegin.o \
 $(KERNEL_OBJS) \
-$(LIBS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
+$(LIBS) \
 
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .c .S
@@ -52,6 +53,7 @@ $(ARCHDIR)/crtn.o \
 all: beanos.kernel
 
 beanos.kernel: $(OBJS) $(ARCHDIR)/linker.ld
+	echo $(KERNEL_OBJS)
 	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:

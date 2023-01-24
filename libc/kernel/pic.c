@@ -1,4 +1,5 @@
-#include "low_level.h"
+#include <sys/io.h>
+#include <kernel.h>
 
 #define PIC1 0x20
 #define PIC2 0xA0

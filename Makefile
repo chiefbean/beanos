@@ -1,7 +1,8 @@
+DESTDIR=$(shell pwd)/sysroot
 
-install:
-	cd libc && make install
-	cd kernel && make install
+install: install-headers
+	cd libc && DESTDIR=$(DESTDIR) make install
+	cd kernel && DESTDIR=$(DESTDIR) make install
 
 clean:
 	cd libc && make clean
@@ -10,3 +11,7 @@ clean:
 
 run: install
 	qemu-system-i386 -kernel kernel/beanos.kernel
+
+install-headers:
+	cd libc && DESTDIR=$(DESTDIR) make install-headers
+	cd kernel && DESTDIR=$(DESTDIR) make install-headers
