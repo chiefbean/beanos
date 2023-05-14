@@ -60,6 +60,22 @@ int printf(const char* restrict format, ...) {
                 return -1;
 
             written += len;
+        } else if (*format == 'd') {
+            format++;
+
+            int num = va_arg(parameters, int);
+
+            char* str = "";
+            itoa(num, str, 10);
+            
+            size_t len = strlen(str);
+            if (maxrem < len)
+                return -1;
+            if(!print(str, len))
+                return -1;
+
+            written += 1;
+        
         } else {
             format = format_begun_at;
             size_t len = strlen(format);

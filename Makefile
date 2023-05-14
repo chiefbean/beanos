@@ -10,7 +10,7 @@ clean:
 	rm -rf sysroot/usr sysroot/boot
 
 run: install
-	qemu-system-i386 -kernel kernel/beanos.kernel
+	qemu-system-i386 -kernel kernel/beanos.kernel -d int -no-reboot -no-shutdown
 
 install-headers:
 	cd libc && DESTDIR=$(DESTDIR) make install-headers

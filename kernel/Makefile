@@ -13,7 +13,7 @@ BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(PREFIX)/lib
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra --sysroot=$(DESTDIR) -isystem=$(INCLUDEDIR)
+CFLAGS:=$(CFLAGS) -fcommon -ffreestanding -Wall -Wextra --sysroot=$(DESTDIR) -isystem=$(INCLUDEDIR)
 CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
@@ -27,7 +27,7 @@ CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
-KERNEL_OBJS=kernel/kernel.o
+KERNEL_OBJS=kernel/kernel.o include/kernel/interrupt.o include/kernel/gdt.o
 KERNEL_OBJS:=$(KERNEL_OBJS) $(KERNEL_ARCH_OBJS)
 
 

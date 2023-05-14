@@ -13,7 +13,7 @@ EXEC_PREFIX?=$(PREFIX)
 INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(EXEC_PREFIX)/lib
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra --sysroot=$(DESTDIR) -isystem=$(INCLUDEDIR)
+CFLAGS:=$(CFLAGS) -fcommon -ffreestanding -Wall -Wextra --sysroot=$(DESTDIR) -isystem=$(INCLUDEDIR)
 CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
 LIBK_CFLAGS:=$(CFLAGS)
 LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk
@@ -29,22 +29,24 @@ LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREEOBJS=\
 $(ARCH_FREEOBJS) \
+string/memcmp.o \
+string/memcpy.o \
+string/memmove.o \
+string/memset.o \
 string/strlen.o \
 string/itoa.o \
 sys/io/inb.o \
 sys/io/outb.o \
 sys/io/inw.o \
 sys/io/outw.o \
+sys/isr.o \
+sys/idt.o \
 kernel/pic.o \
 kernel/paging.o \
 stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \
-# stdlib/abort.o \
-# string/memcmp.o \
-# string/memcpy.o \
-# string/memmove.o \
-# string/memset.o \
+stdlib/abort.o \
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \
