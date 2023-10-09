@@ -48,4 +48,8 @@ typedef struct {
 void isr_install();
 void isr_handler(registers_t r);
 
+typedef void (*isr_t)(registers_t);
+isr_t interrupt_handlers[256];
+void register_interrupt_handler(uint8_t n, isr_t handler);
+
 #endif

@@ -1,33 +1,69 @@
 #include <sys/io.h>
 #include <kernel.h>
+#include <sys/irq.h>
+ 
+void sendEOI(unsigned char irq) {
+	if(irq >= 8)
+		outb(PIC2_COMMAND,PIC_EOI);
+ 
+	outb(PIC1_COMMAND,PIC_EOI);
+}
 
-#define PIC1 0x20
-#define PIC2 0xA0
-
-#define ICW1 0x11
-#define ICW4 0x01
-
-/* init_pics()
- * init the PICs and remap them
- */
-void init_pics(int pic1, int pic2)
+void initPIC(int offset1, int offset2)
 {
-	/* send ICW1 */
-	outb(PIC1, ICW1);
-	outb(PIC2, ICW1);
+	unsigned char a1, a2;
+ 
+	a1 = inb(PIC1_DATA);                        // save masks
+	a2 = inb(PIC2_DATA);
+ 
+	outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
+	io_wait();
+	outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);
+	io_wait();
+	outb(PIC1_DATA, offset1);                 // ICW2: Master PIC vector offset
+	io_wait();
+	outb(PIC2_DATA, offset2);                 // ICW2: Slave PIC vector offset
+	io_wait();
+	outb(PIC1_DATA, 4);                       // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+	io_wait();
+	outb(PIC2_DATA, 2);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
+	io_wait();
+ 
+	outb(PIC1_DATA, ICW4_8086);               // ICW4: have the PICs use 8086 mode (and not 8080 mode)
+	io_wait();
+	outb(PIC2_DATA, ICW4_8086);
+	io_wait();
+ 
+	outb(PIC1_DATA, a1);   // restore saved masks.
+	outb(PIC2_DATA, a2);
 
-	/* send ICW2 */
-	outb(PIC1 + 1, pic1);	/* remap */
-	outb(PIC2 + 1, pic2);	/*  pics */
+	irq_install();
+}
 
-	/* send ICW3 */
-	outb(PIC1 + 1, 4);	/* IRQ2 -> connection to slave */
-	outb(PIC2 + 1, 2);
-
-	/* send ICW4 */
-	outb(PIC1 + 1, ICW4);
-	outb(PIC2 + 1, ICW4);
-
-	/* disable all IRQs */
-	outb(PIC1 + 1, 0xFF);
+void IRQ_set_mask(unsigned char IRQline) {
+    uint16_t port;
+    uint8_t value;
+ 
+    if(IRQline < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        IRQline -= 8;
+    }
+    value = inb(port) | (1 << IRQline);
+    outb(port, value);        
+}
+ 
+void IRQ_clear_mask(unsigned char IRQline) {
+    uint16_t port;
+    uint8_t value;
+ 
+    if(IRQline < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        IRQline -= 8;
+    }
+    value = inb(port) & ~(1 << IRQline);
+    outb(port, value);        
 }

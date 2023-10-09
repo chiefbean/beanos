@@ -15,3 +15,6 @@ run: install
 install-headers:
 	cd libc && DESTDIR=$(DESTDIR) make install-headers
 	cd kernel && DESTDIR=$(DESTDIR) make install-headers
+
+debug: install
+	qemu-system-i386 -s -S -kernel kernel/beanos.kernel

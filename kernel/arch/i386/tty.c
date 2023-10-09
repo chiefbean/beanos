@@ -49,6 +49,7 @@ void terminal_putchar(char c) {
 		terminal_column = 0;
 		if(++terminal_row == VGA_HEIGHT)
 			scroll_screen();
+		update_cursor(terminal_row, terminal_column);
 	}
 	else {
 		terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
@@ -102,13 +103,13 @@ void clear_screen() {
 }
 
 void scroll_screen() {
-	for(size_t i = 0; i < ((VGA_HEIGHT-1)*VGA_WIDTH); i++) {
-		terminal_buffer[i] = vga_entry(terminal_buffer[i+VGA_WIDTH], terminal_color);
-	}
-	for(size_t i = ((VGA_HEIGHT-1)*VGA_WIDTH); i < VGA_HEIGHT*VGA_WIDTH; i++) {
-		terminal_buffer[i] = vga_entry(' ', terminal_color);
-	}
-	terminal_row = VGA_HEIGHT-1;
+	// for(size_t i = 0; i < ((VGA_HEIGHT-1)*VGA_WIDTH); i++) {
+	// 	terminal_buffer[i] = vga_entry(terminal_buffer[i+VGA_WIDTH], terminal_color);
+	// }
+	// for(size_t i = ((VGA_HEIGHT-1)*VGA_WIDTH); i < VGA_HEIGHT*VGA_WIDTH; i++) {
+	// 	terminal_buffer[i] = vga_entry(' ', terminal_color);
+	// }
+	// terminal_row = VGA_HEIGHT-1;
 }
 
 void enable_cursor(uint8_t cursor_start, uint8_t cursor_end) {

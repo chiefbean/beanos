@@ -1,12 +1,14 @@
 #include <sys/idt.h>
 #include <stdint.h>
 
+extern void idt_flush(uint32_t);
+
 void set_idt_gate(int n, uint32_t handler) {
-    idt[n].low_offset = (uint16_t)(handler & 0xFFFF);
+    idt[n].low_offset = (uint16_t)handler & 0xFFFF;
     idt[n].sel = KERNEL_CS;
     idt[n].always0 = 0;
     idt[n].flags = 0x8E; 
-    idt[n].high_offset = (uint16_t)((handler >> 16) & 0xFFFF);
+    idt[n].high_offset = (uint16_t)handler >> 16;
 }
 
 void set_idt() {

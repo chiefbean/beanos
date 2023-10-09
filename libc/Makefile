@@ -41,8 +41,11 @@ sys/io/inw.o \
 sys/io/outw.o \
 sys/isr.o \
 sys/idt.o \
-kernel/pic.o \
+sys/irq.o \
+sys/gdt.o \
 kernel/paging.o \
+kernel/pic.o \
+sys/timer.o \
 stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \

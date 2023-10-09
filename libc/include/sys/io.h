@@ -14,6 +14,9 @@ unsigned char inb(unsigned short port);
 void outb(unsigned short port, unsigned char data);
 unsigned short inw(unsigned short port);
 void outw(unsigned short port, unsigned short data);
+static inline void io_wait(void) {
+    outb(0x80, 0);
+}
 
 #ifdef __cplusplus
 }
