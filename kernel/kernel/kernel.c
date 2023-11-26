@@ -8,10 +8,10 @@
 void kernel_main() {
 	terminal_initialize();
 	printf("Kernel initialized.\n");
-	enable_paging();
-	printf("Paging enabled.\n");
+	//enable_paging();
+	//printf("Paging enabled.\n");
 
-	//init_descriptor_tables();
+	init_descriptor_tables();
 	isr_install();
 	printf("ISRs installed.\n");
 	//asm("int $0");
