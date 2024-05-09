@@ -1,2 +1,4 @@
 .vscode
 Makefile.old
+*.o
+*.d
