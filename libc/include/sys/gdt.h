@@ -2,6 +2,7 @@
 #define _GDT_H 1
 
 #include <stdint.h>
+#include <stdio.h>
 
 struct gdt_entry_struct
 {
