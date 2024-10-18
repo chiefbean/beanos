@@ -17,7 +17,7 @@ void init_descriptor_tables()
 
 static void init_gdt()
 {
-    printf("%d",(sizeof(gdt_entry_t) * 5) - 1);
+    //printf("%d",(sizeof(gdt_entry_t) * 5) - 1);
     gdt_ptr.limit = (sizeof(gdt_entry_t) * 5) - 1;
     gdt_ptr.base  = (uint32_t)&gdt_entries;
 
@@ -27,7 +27,8 @@ static void init_gdt()
     gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User mode code segment
     gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
 
-    gdt_flush((uint32_t)&gdt_ptr);
+    //gdt_flush((uint32_t)&gdt_ptr);
+    __asm__ __volatile__("lgdt %0" : : "m"(gdt_ptr));
 }
 
 // Set the value of one GDT entry.

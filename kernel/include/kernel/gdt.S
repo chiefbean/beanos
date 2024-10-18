@@ -1,7 +1,7 @@
 .global gdt_flush       # Allows the C code to call gdt_flush().
 gdt_flush:
    movl %eax, 6(%esp)   # Get the pointer to the GDT, passed as a parameter.
-   lgdt (%eax)          # Load the new GDT pointer
+   lgdt (%eax)         # Load the new GDT pointer
    push 0x08
    push .flush           # 0x08 is the offset to our code segment: Far jump!
    retf
