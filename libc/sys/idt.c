@@ -1,5 +1,6 @@
 #include <sys/idt.h>
 #include <stdint.h>
+#include <stdio.h>
 
 extern void idt_flush(uint32_t);
 
@@ -14,7 +15,8 @@ void set_idt_gate(int n, uint32_t handler) {
 void set_idt() {
     idt_reg.base = (uint32_t) &idt;
     idt_reg.limit = IDT_ENTRIES * sizeof(idt_gate_t) - 1;
+    //printf("%x\n\n", idt_reg.base);
     /* Don't make the mistake of loading &idt -- always load &idt_reg */
-    __asm__ __volatile__("lidt %0" : : "m"(idt_reg));
-    __asm__ __volatile__("sti");
+    __asm__ __volatile__("lidt (%0)" : : "r"(&idt_reg));
+    // __asm__ __volatile__("sti");
 }

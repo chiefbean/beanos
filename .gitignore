@@ -2,3 +2,4 @@
 Makefile.old
 *.o
 *.d
+sysroot

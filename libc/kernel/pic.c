@@ -2,7 +2,7 @@
 #include <kernel.h>
 #include <sys/irq.h>
  
-void sendEOI(unsigned char irq) {
+void sendEOI(uint8_t irq) {
 	if(irq >= 8)
 		outb(PIC2_COMMAND,PIC_EOI);
  
@@ -36,11 +36,9 @@ void initPIC(int offset1, int offset2)
  
 	outb(PIC1_DATA, a1);   // restore saved masks.
 	outb(PIC2_DATA, a2);
-
-	irq_install();
 }
 
-void IRQ_set_mask(unsigned char IRQline) {
+void IRQ_set_mask(uint8_t IRQline) {
     uint16_t port;
     uint8_t value;
  
@@ -54,7 +52,7 @@ void IRQ_set_mask(unsigned char IRQline) {
     outb(port, value);        
 }
  
-void IRQ_clear_mask(unsigned char IRQline) {
+void IRQ_clear_mask(uint8_t IRQline) {
     uint16_t port;
     uint8_t value;
  

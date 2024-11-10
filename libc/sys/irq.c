@@ -1,4 +1,5 @@
 #include <sys/irq.h>
+#include <kernel.h>
 
 void irq_install() {
     set_idt_gate(32, (uint32_t)irq0);
@@ -17,6 +18,10 @@ void irq_install() {
     set_idt_gate(45, (uint32_t)irq13);
     set_idt_gate(46, (uint32_t)irq14);
     set_idt_gate(47, (uint32_t)irq15);
+
+    for(uint8_t i = 32; i < 48; i++) {
+        IRQ_set_mask(i);
+    }
 }
 void irq_handler(registers_t regs) {
     // Send an EOI (end of interrupt) signal to the PICs.

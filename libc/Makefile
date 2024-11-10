@@ -2,7 +2,7 @@ CC=i686-elf-gcc
 AS=i686-elf-as
 AR=i686-elf-ar
 
-CFLAGS?=-O2 -g
+CFLAGS?=-g -O1
 CPPFLAGS?=
 LDFLAGS?=
 LIBS?=

@@ -27,8 +27,10 @@ static void init_gdt()
     gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User mode code segment
     gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
 
+    //printf("%x\n", &gdt_ptr);
+    __asm__ __volatile__("lgdt (%0)" : : "r"(&gdt_ptr));
     //gdt_flush((uint32_t)&gdt_ptr);
-    __asm__ __volatile__("lgdt %0" : : "m"(gdt_ptr));
+    //__asm__ __volatile__("lgdt %0" : : "m"(gdt_ptr));
 }
 
 // Set the value of one GDT entry.

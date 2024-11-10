@@ -76,6 +76,22 @@ int printf(const char* restrict format, ...) {
 
             written += 1;
         
+        } else if (*format == 'x') {
+            format++;
+
+            int num = va_arg(parameters, int);
+
+            char* str = "";
+            itoa(num, str, 16);
+            
+            size_t len = strlen(str);
+            if (maxrem < len)
+                return -1;
+            if(!print(str, len))
+                return -1;
+
+            written += 1;
+        
         } else {
             format = format_begun_at;
             size_t len = strlen(format);
