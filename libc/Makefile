@@ -29,26 +29,17 @@ LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREEOBJS=\
 $(ARCH_FREEOBJS) \
-string/memcmp.o \
-string/memcpy.o \
-string/memmove.o \
-string/memset.o \
-string/strlen.o \
-string/itoa.o \
-sys/io/inb.o \
-sys/io/outb.o \
-sys/io/inw.o \
-sys/io/outw.o \
+string/string.o \
+sys/io.o \
 sys/isr.o \
 sys/idt.o \
 sys/irq.o \
 sys/gdt.o \
+sys/timer.o \
+sys/keyboard.o \
 kernel/paging.o \
 kernel/pic.o \
-sys/timer.o \
-stdio/printf.o \
-stdio/putchar.o \
-stdio/puts.o \
+stdio/stdio.o \
 stdlib/abort.o \
 
 HOSTEDOBJS=\

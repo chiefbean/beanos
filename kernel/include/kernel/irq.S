@@ -3,21 +3,21 @@ irq_common_stub:
     pusha
     mov %ds, %eax # Lower 16-bits of eax = ds.
 	push %eax # save the data segment descriptor
-	mov %ax, 0x10  # kernel data segment descriptor
-    mov %ds, %ax
-	mov %es, %ax
-	mov %fs, %ax
-	mov %gs, %ax
+	mov $0x10, %ax  # kernel data segment descriptor
+	mov %ax, %ds
+	mov %ax, %es
+	mov %ax, %fs
+	mov %ax, %gs
 
     call irq_handler
 
-    pop %ebx 
-	mov %ds, %ax
-	mov %es, %ax
-	mov %fs, %ax
-	mov %gs, %ax
+    pop %ebx
+	mov %bx, %ds
+	mov %bx, %es
+	mov %bx, %fs
+	mov %bx, %gs
 	popa
-	add %esp, 4 # Cleans up the pushed error code and pushed ISR number
+	add $8, %esp # Cleans up the pushed error code and pushed ISR number
 	iret # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 
 .text

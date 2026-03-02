@@ -21,7 +21,7 @@ void enable_paging() {
 		page_directory[i] = 0x00000002;
 	}
 
-	uint32_t first_page_table[1024] __attribute__((aligned(4096)));
+	static uint32_t first_page_table[1024] __attribute__((aligned(4096)));
 	unsigned int i;
 	//we will fill all 1024 entries in the table, mapping 4 megabytes
 	for(i = 0; i < 1024; i++)

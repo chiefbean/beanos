@@ -4,6 +4,25 @@
 #include <stdio.h>
 #include <string.h>
 
+#if defined (__is_libk)
+#include <kernel/tty.h>
+#endif
+
+int putchar(int ic) {
+#if defined (__is_libk)
+    char c = (char) ic;
+    terminal_write(&c, sizeof(c));
+#else
+
+#endif
+
+    return ic;
+}
+
+int puts(const char* str) {
+    return printf("%s\n", str);
+}
+
 static bool print(const char* data, size_t length) {
     const unsigned char* bytes = (const unsigned char*) data;
 	for (size_t i = 0; i < length; i++)
@@ -27,12 +46,12 @@ int printf(const char* restrict format, ...) {
             size_t amount = 1;
             while (format[amount] && format[amount] != '%')
                 amount++;
-            
+
             if (maxrem < amount)
                 return -1;
             if(!print(format, amount))
                 return -1;
-            
+
             format += amount;
             written += amount;
             continue;
@@ -45,10 +64,10 @@ int printf(const char* restrict format, ...) {
             char c = (char) va_arg(parameters, int);
             if (!maxrem)
                 return -1;
-            
+
             if (!print(&c, sizeof(c)))
                 return -1;
-            
+
             written++;
         } else if (*format == 's') {
             format++;
@@ -67,7 +86,7 @@ int printf(const char* restrict format, ...) {
 
             char* str = "";
             itoa(num, str, 10);
-            
+
             size_t len = strlen(str);
             if (maxrem < len)
                 return -1;
@@ -75,7 +94,7 @@ int printf(const char* restrict format, ...) {
                 return -1;
 
             written += 1;
-        
+
         } else if (*format == 'x') {
             format++;
 
@@ -83,7 +102,7 @@ int printf(const char* restrict format, ...) {
 
             char* str = "";
             itoa(num, str, 16);
-            
+
             size_t len = strlen(str);
             if (maxrem < len)
                 return -1;
@@ -91,7 +110,7 @@ int printf(const char* restrict format, ...) {
                 return -1;
 
             written += 1;
-        
+
         } else {
             format = format_begun_at;
             size_t len = strlen(format);

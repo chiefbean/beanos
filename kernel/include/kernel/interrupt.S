@@ -7,23 +7,23 @@ isr_common_stub:
 	pusha # Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
 	mov %ds, %eax # Lower 16-bits of eax = ds.
 	push %eax # save the data segment descriptor
-	mov %ax, 0x10  # kernel data segment descriptor
-    mov %ds, %ax
-	mov %es, %ax
-	mov %fs, %ax
-	mov %gs, %ax
-	
+	mov $0x10, %ax  # kernel data segment descriptor
+	mov %ax, %ds
+	mov %ax, %es
+	mov %ax, %fs
+	mov %ax, %gs
+
     # 2. Call C handler
 	call isr_handler
-	
+
     # 3. Restore state
-	pop %eax 
-	mov %ds, %ax
-	mov %es, %ax
-	mov %fs, %ax
-	mov %gs, %ax
+	pop %eax
+	mov %ax, %ds
+	mov %ax, %es
+	mov %ax, %fs
+	mov %ax, %gs
 	popa
-	add %esp, 4 # Cleans up the pushed error code and pushed ISR number
+	add $8, %esp # Cleans up the pushed error code and pushed ISR number
 	iret # pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 	
 /*
@@ -129,6 +129,7 @@ isr9:
 .global isr10
 isr10:
     #cli
+    push $0
     push $10
     jmp isr_common_stub
 

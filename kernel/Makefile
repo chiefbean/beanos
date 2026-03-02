@@ -12,6 +12,7 @@ EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(PREFIX)/lib
+LDFLAGS:=$(LDFLAGS) -L$(DESTDIR)$(LIBDIR)
 
 CFLAGS:=$(CFLAGS) -fcommon -ffreestanding -Wall -Wextra --sysroot=$(DESTDIR) -isystem=$(INCLUDEDIR)
 CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude

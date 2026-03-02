@@ -1,6 +1,6 @@
 #include <sys/gdt.h>
 
-extern void gdt_flush(uint32_t);
+extern void gdt_flush(void);
 
 // Internal function prototypes.
 static void init_gdt();
@@ -29,7 +29,7 @@ static void init_gdt()
 
     //printf("%x\n", &gdt_ptr);
     __asm__ __volatile__("lgdt (%0)" : : "r"(&gdt_ptr));
-    //gdt_flush((uint32_t)&gdt_ptr);
+    gdt_flush();
     //__asm__ __volatile__("lgdt %0" : : "m"(gdt_ptr));
 }
 

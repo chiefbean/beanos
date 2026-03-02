@@ -7,7 +7,7 @@ uint32_t tick = 0;
 static void timer_callback(registers_t regs)
 {
    tick++;
-   printf("%s Tick: %d\n", regs.int_no, tick);
+   if (tick % 1000 == 0) printf("Tick: %d\n", tick);
 }
 
 void init_timer(uint32_t frequency)

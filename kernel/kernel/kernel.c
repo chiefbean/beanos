@@ -5,12 +5,11 @@
 #include <sys/irq.h>
 #include <sys/gdt.h>
 #include <sys/timer.h>
+#include <sys/keyboard.h>
 
 void kernel_main() {
 	terminal_initialize();
 	printf("Kernel initialized.\n");
-	// enable_paging();
-	// printf("Paging enabled.\n");
 
 	init_descriptor_tables();
 	isr_install();
@@ -19,21 +18,19 @@ void kernel_main() {
 	initPIC(0x20, 0x28);
 	printf("PICs initialized.\n");
 
-	// asm("int $10");
-	// printf("interrupted\n");
 	__asm__ __volatile__("sti");
 	printf("interrupts enabled\n");
 
-	__asm__ __volatile__("int $10");
-	printf("interrupted\n");
-
-	// irq_install();
-	// printf("IRQs installed.\n");
+	irq_install();
+	printf("IRQs installed.\n");
 	
-	// init_timer(50);
-	// printf("timer init\n");
+	init_timer(50);
+	printf("timer init\n");
+
+	init_keyboard();
 
 	for(;;) {
-   		asm("hlt");
+   		char key = keyboard_getchar();
+		if (key != '\0') printf("%c", key);
  	}
 }

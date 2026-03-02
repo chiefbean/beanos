@@ -18,4 +18,4 @@ install-headers:
 	cd kernel && DESTDIR=$(DESTDIR) make install-headers
 
 debug: install
-	qemu-system-i386 -s -S -kernel kernel/beanos.kernel -d int -no-reboot -no-shutdown -D log.txt -monitor stdio
+	qemu-system-i386 -s -kernel kernel/beanos.kernel -d int -no-reboot -no-shutdown -D log.txt -monitor stdio

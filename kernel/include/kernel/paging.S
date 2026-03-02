@@ -2,10 +2,10 @@
 .global loadPageDirectory
 loadPageDirectory:
     push %ebp
-    mov %ebp, %esp
-    mov %eax, 8(%esp)
-    mov %cr3, %eax
     mov %esp, %ebp
+    mov 8(%esp), %eax
+    mov %eax, %cr3
+    mov %ebp, %esp
     pop %ebp
     ret
 
@@ -13,10 +13,10 @@ loadPageDirectory:
 .global enablePaging
 enablePaging:
     push %ebp
-    mov %ebp, %esp
-    mov %eax, %cr0
-    or $0x80000000, %eax
-    mov %cr0, %eax
     mov %esp, %ebp
+    mov %cr0, %eax
+    or $0x80000000, %eax
+    mov %eax, %cr0
+    mov %ebp, %esp
     pop %ebp
     ret
