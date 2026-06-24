@@ -101,25 +101,87 @@ beanos/
 
 ---
 
-### Phase 1: Keyboard Input & Interactive Shell
+### Phase 1: Keyboard Input & Interactive Shell - DONE
 
 **1.1 — PS/2 Keyboard Driver**
-- Register IRQ1 handler for keyboard interrupts
-- Read scancodes from port 0x60
-- Scancode set 1 translation table (make/break codes)
-- Handle modifier keys (shift, ctrl, alt, capslock)
-- Expose `keyboard_getchar()` or a ring buffer for input
+[x] Register IRQ1 handler for keyboard interrupts
+[x] Read scancodes from port 0x60
+[x] Scancode set 1 translation table (make/break codes)
+[x] Handle modifier keys (shift, ctrl, alt, capslock)
+[x] Expose `keyboard_getchar()` or a ring buffer for input
 
 **1.2 — Line Input Buffer**
-- Implement a `getline()` / `readline()` function
-- Keyboard buffer with backspace support
-- Echo typed characters to screen
-- Return completed line on Enter
+[x] Implement a `getline()` / `readline()` function
+[x] Keyboard buffer with backspace support
+[x] Echo typed characters to screen
+[x] Return completed line on Enter
 
 **1.3 — Basic Shell**
-- Simple command loop: print prompt, read line, parse command, execute
-- Built-in commands to start with: `help`, `clear`, `echo`, `tick` (show timer), `reboot`
-- Command dispatcher (string compare against known commands)
+[x] Simple command loop: print prompt, read line, parse command, execute
+[x] Built-in commands to start with: `help`, `clear`, `echo`, `tick` (show timer), `reboot`
+[x] Command dispatcher (string compare against known commands)
+
+---
+
+### Pre-Phase 2: Blockers to Clear First - DONE
+Plumbing and bug fixes that Phase 2 depends on. The first two are hard blockers —
+without them there is no memory map to parse. The rest are debugging quality-of-life
+that you will badly want the moment you start chasing allocator bugs.
+
+**P2.0 — Pass the multiboot info into the kernel (hard blocker)**
+- [x] On entry to `_start`, the bootloader leaves the multiboot magic in `EAX` and a
+      pointer to the multiboot info struct in `EBX`. `boot.s` currently calls
+      `kernel_main` with no arguments and discards both.
+- [x] Push `EBX` (info pointer) and `EAX` (magic) as arguments before `call kernel_main`.
+      The paging setup uses `ecx/edx/esi/edi` and does not clobber `ebx`, so the pointer
+      survives to the call site.
+- [x] Change `kernel_main` signature to `(uint32_t magic, multiboot_info_t* mbi)` and
+      verify the magic before trusting the pointer.
+- [x] Add a `multiboot.h` defining the info struct and memory-map entry layout.
+
+**P2.1 — Make the multiboot info reachable after the identity unmap (hard blocker)**
+- [x] The info struct lives at a low physical address (typically under 1 MiB), but
+      `boot.s` unmaps the identity mapping right before entering `kernel_main`. The
+      higher-half mapping only covers `_kernel_start.._kernel_end`, so dereferencing the
+      physical pointer afterward page-faults.
+- [x] Pick one: parse/copy the memory map *before* unmapping identity, **or** map the
+      multiboot info page into the higher half and access it at `phys + 0xC0000000`.
+
+**P2.2 — printf hardening for memory debugging**
+- [x] Add `%u` (unsigned decimal) and `%p` (pointer) — Phase 2 prints addresses and
+      pointers constantly. (`%x` already handles high addresses like `0xC0000000`.)
+- [x] Fix `written += 1` → `written += len` in the `%d`/`%x` branches (wrong return count).
+- [x] Decide on signed handling: `itoa` takes `uint32_t` and never emits `-`, so `%d` of
+      a negative prints wrong.
+
+**P2.3 — Minor polish (optional, not blocking)**
+- [x] Backspace: `terminal_putchar('\b')` re-increments the column and never calls
+      `update_cursor`, so the visible cursor lags the erase.
+- [x] `strtok`: trailing-separator edge case can emit an empty token / off-by-one count.
+
+---
+
+### File Placement & Include Conventions
+How includes resolve here (set by `kernel/Makefile`: `-Iinclude` plus the sysroot `-isystem`).
+Follow these for every new file in Phases 2–5 and includes "just work" with no Makefile fiddling.
+
+- **Kernel headers → `kernel/include/kernel/<name>.h`**, included as `#include <kernel/<name>.h>`.
+  This is the default for almost everything below. The dir is on the include path and is
+  auto-copied into the sysroot by `make install-headers`, so any `.c` can include it.
+- **Standard C library headers → `libc/include/<name>.h`**, included as `#include <name.h>`
+  (e.g. `stdlib.h`, `string.h`, `stdio.h`). Only for genuine libc APIs (`malloc`, `memcpy`, …).
+- **Low-level x86 helpers → `libc/include/sys/<name>.h`**, included as `#include <sys/<name>.h>`
+  (e.g. `sys/io.h` for `inb`/`outb`).
+- **Private header used by only one sibling `.c` → keep it next to the `.c`** and use
+  `#include "name.h"` (quotes search the file's own directory first). This is how
+  `arch/i386/multiboot.h` works — do not use quote-includes across directories.
+
+For each new `.c`: add its object to `KERNEL_OBJS` in `kernel/Makefile`, and place the source
+by kind — **arch-specific** (touches x86 registers/ports/paging structures) in
+`kernel/arch/i386/`; **arch-independent kernel logic** in `kernel/mm/`, `kernel/drivers/`,
+`kernel/fs/`. (These consolidate the aspirational top-level `drivers/`/`fs/`/`net/` under
+`kernel/` so the existing build and `-Iinclude` cover them with zero extra wiring. It's a
+monolithic kernel — it all links into one binary regardless.)
 
 ---
 
@@ -130,16 +192,32 @@ Required before you can build anything dynamic (buffers, filesystem caches, proc
 - Parse multiboot memory map to find available RAM
 - Bitmap or stack-based frame allocator
 - `alloc_frame()` / `free_frame()` for 4K physical pages
+- **Files:**
+  - `kernel/mm/pmm.c` — allocator; the bitmap is a `static` array inside it (no header needed)
+  - `kernel/include/kernel/pmm.h` — `pmm_init()`, `alloc_frame()`, `free_frame()` → `<kernel/pmm.h>`
+  - reads regions from `<kernel/boot.h>` (`g_boot_info`); reserves the kernel's own range using
+    the `_kernel_start`/`_kernel_end` symbols from `kernel/arch/i386/linker.ld`
 
 **2.2 — Kernel Heap (malloc/free)**
 - Simple allocator on top of the frame allocator (e.g. linked-list first-fit or dlmalloc-style)
 - Implement `kmalloc()`, `kfree()`, `krealloc()`
 - Add `malloc`/`free` to libc
+- **Files:**
+  - `kernel/mm/heap.c` — `kmalloc`/`kfree`/`krealloc` (+ optional early bump allocator)
+  - `kernel/include/kernel/heap.h` — prototypes → `<kernel/heap.h>`
+  - libc bridge (optional): `libc/stdlib/malloc.c` forwarding `malloc`/`free` → `kmalloc`/`kfree`
+    under `#ifdef __is_libk`; declarations go in the existing `libc/include/stdlib.h`
 
 **2.3 — Virtual Memory Manager**
 - Page directory/table management functions
 - `map_page()` / `unmap_page()` for kernel and (later) user space
 - Page fault handler that can grow the heap or report errors
+- **Files:**
+  - `kernel/mm/vmm.c` — `map_page`/`unmap_page` + recursive-mapping setup
+  - `kernel/include/kernel/vmm.h` — prototypes → `<kernel/vmm.h>`
+  - page-fault handler (vector 14): register the C handler via the existing ISR dispatch
+    (`register_interrupt_handler` in `libc/sys/isr.c`; stubs in `kernel/include/kernel/interrupt.S`)
+    — the handler body can live in `vmm.c`
 
 ---
 
@@ -150,12 +228,21 @@ Persistent storage so the OS can actually do something useful.
 - PIO-mode ATA driver (ports 0x1F0-0x1F7)
 - `ata_read_sector()` / `ata_write_sector()` for 512-byte sectors
 - Identify drive command to detect attached disks
+- **Files:**
+  - `kernel/drivers/ata/ata.c` — polling PIO driver; uses `<sys/io.h>` for port access
+  - `kernel/include/kernel/ata.h` — `ata_identify()`, `ata_read_sector()`, `ata_write_sector()` → `<kernel/ata.h>`
+  - build/test: add a `disk.img` (FAT16, made with `mkfs.fat`/`mtools`) and attach it in the
+    `run`/`debug` targets via `-drive file=disk.img,format=raw,if=ide`
 
 **3.2 — Simple Filesystem (FAT16 or custom)**
 - Start with a simple flat filesystem or FAT16 (well-documented, easy to create images)
 - Core operations: `open`, `read`, `write`, `close`, `readdir`
 - VFS (Virtual Filesystem) layer so you can swap implementations later
 - Mount a disk image at boot
+- **Files:**
+  - `kernel/fs/vfs.c` + `kernel/include/kernel/vfs.h` — the node/ops abstraction → `<kernel/vfs.h>` (build this first)
+  - `kernel/fs/fat16/fat16.c` + `kernel/include/kernel/fat16.h` — FAT16 backend behind the VFS → `<kernel/fat16.h>`
+  - depends on `<kernel/ata.h>` (disk I/O) and `<kernel/heap.h>` (buffers / sector cache)
 
 **3.3 — Shell Filesystem Commands**
 - `ls` — list files
@@ -163,6 +250,9 @@ Persistent storage so the OS can actually do something useful.
 - `write` — write text to a file
 - `mkdir` — create directory (if using a hierarchical FS)
 - `rm` — delete file
+- **Files:**
+  - extend the existing `kernel/kernel/shell.c` — add `ls`/`cat`/`write`/`mkdir`/`rm` rows to the
+    command table; each handler calls into `<kernel/vfs.h>` (no new module needed)
 
 ---
 

@@ -7,6 +7,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern void irq0();
 extern void irq1();
 extern void irq2();
@@ -26,5 +30,9 @@ extern void irq15();
 
 void irq_install();
 void irq_handler(registers_t r);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

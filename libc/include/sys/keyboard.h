@@ -4,6 +4,10 @@
 #include <sys/io.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     char buf[256];
     uint8_t head;
@@ -17,6 +21,11 @@ char shift_scancode_table[256];
 
 void init_keyboard();
 char keyboard_getchar();
+char* getline();
 void init_scancodes();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

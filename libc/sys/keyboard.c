@@ -3,31 +3,48 @@
 #include <sys/isr.h>
 
 uint8_t shift = 0;
+static char linebuf[256];
+static uint8_t linepos = 0;
 
-static void keyboard_callback(registers_t regs)
+static void keyboard_callback()
 {
     uint8_t scancode = inb(0x60);
-    if (scancode == 0x2A || scancode == 0x36 || scancode == 0xAA || scancode == 0xB6 || scancode == 0x3A) {
+    if (scancode == 0x2A || scancode == 0x36) {
+        shift = 1;
+        return;
+    }
+    if (scancode == 0xAA || scancode == 0xB6) {
+        shift = 0;
+        return;
+    }
+    if (scancode == 0x3A) {
         shift ^= 1;
         return;
     }
 
     if (scancode == 0x0E) {
-        keybuffer.tail--;
-        keybuffer.head--;
+        if (linepos > 0)
+            linepos--;
     }
 
     if (scancode < 0x59) {
         char key = scancode_table[scancode];
         if (shift) key = shift_scancode_table[scancode];
-        else scancode_table[scancode];
         keybuffer.buf[keybuffer.head++] = key;
+        if (key != '\n' && key != '\b' && linepos < 255)
+            linebuf[linepos++] = key;
     }
 }
 
 char keyboard_getchar() {
     if (keybuffer.head == keybuffer.tail) return '\0';
     return keybuffer.buf[keybuffer.tail++];
+}
+
+char* getline() {
+    linebuf[linepos] = '\0';
+    linepos = 0;
+    return linebuf;
 }
 
 void init_keyboard()
@@ -44,7 +61,7 @@ void init_keyboard()
     }
 
     if (count >= 3) {
-        printf("Failed to initialize keyboard\n");
+        printf("\nFailed to initialize keyboard");
         __asm__ __volatile__("int $16");
     }
     init_scancodes();
@@ -52,7 +69,7 @@ void init_keyboard()
     keybuffer.tail = 0;
     keybuffer.head = 0;
 
-    printf("Keyboard initialized\n");
+    printf("\nKeyboard initialized");
 } 
 
 void init_scancodes() {

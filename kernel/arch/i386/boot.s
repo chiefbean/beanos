@@ -50,9 +50,9 @@ _start:
 1:
 	# Only map the kernel.
 	cmpl $_kernel_start, %esi
-	jl 2f
+	# jl 2f
 	cmpl $(_kernel_end - 0xC0000000), %esi
-	jge 3f
+	# jge 3f
 
 	# Map physical address as "present, writable". Note that this maps
 	# .text and .rodata as writable. Mind security and map them as non-writable.
@@ -110,6 +110,10 @@ _start:
 
 	# Set up the stack.
 	mov $stack_top, %esp
+
+	# Push EAX and EBX for kernel_main
+	push %ebx
+	push %eax
 
 	# Enter the high-level kernel.
 	call kernel_main

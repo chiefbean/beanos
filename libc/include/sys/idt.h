@@ -6,6 +6,10 @@
 /* Segment selectors */
 #define KERNEL_CS 0x08
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* How every interrupt gate (handler) is defined */
 typedef struct {
     uint16_t low_offset; /* Lower 16 bits of handler function address */
@@ -35,5 +39,9 @@ idt_register_t idt_reg;
 /* Functions implemented in idt.c */
 void set_idt_gate(int n, uint32_t handler);
 void set_idt();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

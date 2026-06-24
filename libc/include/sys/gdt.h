@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct gdt_entry_struct
 {
    uint16_t limit_low;           // The lower 16 bits of the limit.
@@ -24,5 +28,9 @@ struct gdt_ptr_struct
 typedef struct gdt_ptr_struct gdt_ptr_t; 
 
 void init_descriptor_tables(); 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

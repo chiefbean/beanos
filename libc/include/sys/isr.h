@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ISRs reserved for CPU exceptions */
 extern void isr0();
 extern void isr1();
@@ -51,5 +55,9 @@ void isr_handler(registers_t r);
 typedef void (*isr_t)(registers_t);
 isr_t interrupt_handlers[256];
 void register_interrupt_handler(uint8_t n, isr_t handler);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

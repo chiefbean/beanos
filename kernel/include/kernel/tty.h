@@ -1,9 +1,12 @@
 #ifndef _KERNEL_TTY_H
-#define _KERNEL_TTY_H
+#define _KERNEL_TTY_H 1
 
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void terminal_initialize(void);
 void terminal_putchar(char c);
@@ -16,5 +19,9 @@ void clear_screen();
 void scroll_screen();
 void enable_cursor(uint8_t cursor_start, uint8_t cursor_end);
 void update_cursor(int x, int y);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

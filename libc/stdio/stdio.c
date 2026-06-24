@@ -79,37 +79,104 @@ int printf(const char* restrict format, ...) {
                 return -1;
 
             written += len;
-        } else if (*format == 'd') {
+        } else if (*format == 'd' || *format == 'i') {
             format++;
 
             int num = va_arg(parameters, int);
 
-            char* str = "";
-            itoa(num, str, 10);
+            unsigned mag = (num < 0) ? -(unsigned)num : (unsigned)num;
 
-            size_t len = strlen(str);
+            char buf[13];
+            itoa(mag, buf, 10);
+
+            size_t len = strlen(buf);
             if (maxrem < len)
                 return -1;
-            if(!print(str, len))
-                return -1;
-
-            written += 1;
+            if (num < 0) {
+                memmove(buf + 1, buf, len + 1);
+                buf[0] = '-';
+                if(!print(buf, len + 1))
+                    return -1;
+                written += len + 1;
+            } else {
+                if(!print(buf, len))
+                    return -1;
+                written += len;
+            }
 
         } else if (*format == 'x') {
             format++;
 
-            int num = va_arg(parameters, int);
+            unsigned int num = va_arg(parameters, unsigned int);
 
-            char* str = "";
-            itoa(num, str, 16);
+            char buf[14];
+            itoa(num, buf, 16);
 
-            size_t len = strlen(str);
+            size_t len = strlen(buf) + 2;
+
+            memmove(buf + 2, buf, len);
+            buf[0] = '0';
+            buf[1] = 'x';
+
             if (maxrem < len)
                 return -1;
-            if(!print(str, len))
+            if(!print(buf, len))
                 return -1;
 
-            written += 1;
+            written += len;
+
+        } else if (*format == 'p') {
+            format++;
+
+            uintptr_t num = va_arg(parameters, uintptr_t);
+
+            char buf[14];
+            itoa(num, buf, 16);
+
+            size_t len = strlen(buf) + 2;
+
+            memmove(buf + 2, buf, len);
+            buf[0] = '0';
+            buf[1] = 'x';
+
+            if (maxrem < len)
+                return -1;
+            if(!print(buf, len))
+                return -1;
+
+            written += len;
+
+        } else if (*format == 'o') {
+            format++;
+
+            unsigned int num = va_arg(parameters, unsigned int);
+
+            char buf[13];
+            itoa(num, buf, 8);
+
+            size_t len = strlen(buf);
+            if (maxrem < len)
+                return -1;
+            if(!print(buf, len))
+                return -1;
+
+            written += len;
+
+        } else if (*format == 'u') {
+            format++;
+
+            unsigned int num = va_arg(parameters, unsigned int);
+
+            char buf[12];
+            itoa(num, buf, 10);
+
+            size_t len = strlen(buf);
+            if (maxrem < len)
+                return -1;
+            if(!print(buf, len))
+                return -1;
+
+            written += len;
 
         } else {
             format = format_begun_at;

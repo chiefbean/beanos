@@ -78,3 +78,86 @@ char* itoa(uint32_t value, char * str, int base) {
 	}
 	return rc;
 }
+
+int atoi(char* value) {
+	int out = 0;
+	unsigned int started = 0;
+	int sign = 1;
+
+	size_t len = strlen(value);
+	for (size_t i = 0; i < len; i++) {
+		if (value[i] != ' ') {
+			if (value[i] == '-') {
+				sign = -1;
+			}
+			else if (value[i] >= '0' && value[i] <= '9') {
+				out = (out * (started * 10)) + (value[i] - '0');
+				started++;
+			}
+			else if (started != 0) break;
+		} 
+	}
+
+	return out * sign;
+}
+
+char* substr(char* src, size_t start, size_t stop, char* dst) {
+	size_t srclen = strlen(src);
+	if (start >= srclen) {
+		dst[0] = '\0';
+		return dst;
+	}
+	if (stop >= srclen) {
+		stop = srclen;
+	}
+	memcpy(dst, src + start, stop - start);
+	dst[stop - start] = '\0';
+	return dst;
+}
+
+int strtok(char* string, char tok, char** dst) {
+	int last = 0;
+	int count = 0;
+	size_t len = strlen(string);
+
+	for(size_t i = len-1; i >= 0; i--) {
+		if(string[i] != tok) break;
+		string[i] = '\0';
+	}
+
+	for(size_t i = 0; i < len; i++) {
+		if(string[i] != tok) {
+			string += i;
+			break;
+		}
+		string[i] = '\0';
+	}
+
+	for(size_t i = 0; i < len; i++) {
+		if(string[i] == tok) {
+			string[i] = '\0';
+			char* ptr = string+last;
+			dst[count] = ptr;
+			count++;
+			last = i + 1;
+		}
+		if (i == (len - 1)) {
+			char* ptr = string+last;
+			dst[count] = ptr;
+			count++;
+			last = i + 1;
+		}
+	}
+
+	return count;
+}
+
+int strcmp(char* a, char* b) {
+	for (size_t i = 0; i < strlen(a); i++) {
+		if (a[i] != b[i]) {
+			if (a[i] > b[i]) return 1;
+			if (a[i] < b[i]) return -1;
+		}
+	}
+	return 0;
+}
