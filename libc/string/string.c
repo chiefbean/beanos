@@ -59,9 +59,6 @@ char* itoa(uint32_t value, char * str, int base) {
 	}
 
 	rc = ptr = str;
-	if(value < 0 && base == 10) {
-		*ptr++ = '-';
-	}
 
 	low = ptr;
 
@@ -120,9 +117,9 @@ int strtok(char* string, char tok, char** dst) {
 	int count = 0;
 	size_t len = strlen(string);
 
-	for(size_t i = len-1; i >= 0; i--) {
-		if(string[i] != tok) break;
-		string[i] = '\0';
+	for(size_t i = len; i > 0; i--) {
+		if(string[i-1] != tok) break;
+		string[i-1] = '\0';
 	}
 
 	for(size_t i = 0; i < len; i++) {
@@ -153,11 +150,55 @@ int strtok(char* string, char tok, char** dst) {
 }
 
 int strcmp(char* a, char* b) {
-	for (size_t i = 0; i < strlen(a); i++) {
-		if (a[i] != b[i]) {
-			if (a[i] > b[i]) return 1;
-			if (a[i] < b[i]) return -1;
+	while(*a && *a == *b) {a++; b++;}
+	return (unsigned char)*a - (unsigned char)*b;
+}
+
+char* strcpy(char* dst, const char* src) {
+	size_t i = 0;
+	while((dst[i] = src[i]) != '\0') i++;
+	return dst;
+}
+
+char* strncpy(char* dst, const char* src, size_t n) {
+	size_t src_len = strlen(src);
+	if (src_len < n) {
+		for(size_t i = 0; i < n; i++) {
+			if (i > src_len) {
+				dst[i] = '\0';
+			} else {
+				dst[i] = src[i];
+			}
+		}
+	} else {
+		for(size_t i = 0; i < n; i++) {
+			dst[i] = src[i];
 		}
 	}
-	return 0;
+
+	return dst;
+}
+
+size_t strlcpy(char* dst, const char* src, size_t n) {
+	size_t src_len = strlen(src);
+	if (n == 0) {
+		return src_len;
+	}
+	
+	if (src_len < n-1) {
+		for(size_t i = 0; i < n-1; i++) {
+			if (i > src_len) {
+				break;
+			} else {
+				dst[i] = src[i];
+			}
+		}
+	} else {
+		for(size_t i = 0; i < n-1; i++) {
+			dst[i] = src[i];
+		}
+	}
+	dst[n-1] = '\0';
+
+	return src_len;
 }

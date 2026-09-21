@@ -161,63 +161,23 @@ that you will badly want the moment you start chasing allocator bugs.
 
 ---
 
-### File Placement & Include Conventions
-How includes resolve here (set by `kernel/Makefile`: `-Iinclude` plus the sysroot `-isystem`).
-Follow these for every new file in Phases 2–5 and includes "just work" with no Makefile fiddling.
-
-- **Kernel headers → `kernel/include/kernel/<name>.h`**, included as `#include <kernel/<name>.h>`.
-  This is the default for almost everything below. The dir is on the include path and is
-  auto-copied into the sysroot by `make install-headers`, so any `.c` can include it.
-- **Standard C library headers → `libc/include/<name>.h`**, included as `#include <name.h>`
-  (e.g. `stdlib.h`, `string.h`, `stdio.h`). Only for genuine libc APIs (`malloc`, `memcpy`, …).
-- **Low-level x86 helpers → `libc/include/sys/<name>.h`**, included as `#include <sys/<name>.h>`
-  (e.g. `sys/io.h` for `inb`/`outb`).
-- **Private header used by only one sibling `.c` → keep it next to the `.c`** and use
-  `#include "name.h"` (quotes search the file's own directory first). This is how
-  `arch/i386/multiboot.h` works — do not use quote-includes across directories.
-
-For each new `.c`: add its object to `KERNEL_OBJS` in `kernel/Makefile`, and place the source
-by kind — **arch-specific** (touches x86 registers/ports/paging structures) in
-`kernel/arch/i386/`; **arch-independent kernel logic** in `kernel/mm/`, `kernel/drivers/`,
-`kernel/fs/`. (These consolidate the aspirational top-level `drivers/`/`fs/`/`net/` under
-`kernel/` so the existing build and `-Iinclude` cover them with zero extra wiring. It's a
-monolithic kernel — it all links into one binary regardless.)
-
----
-
-### Phase 2: Memory Management
+### Phase 2: Memory Management - DONE
 Required before you can build anything dynamic (buffers, filesystem caches, process stacks).
 
 **2.1 — Physical Memory Manager**
-- Parse multiboot memory map to find available RAM
-- Bitmap or stack-based frame allocator
-- `alloc_frame()` / `free_frame()` for 4K physical pages
-- **Files:**
-  - `kernel/mm/pmm.c` — allocator; the bitmap is a `static` array inside it (no header needed)
-  - `kernel/include/kernel/pmm.h` — `pmm_init()`, `alloc_frame()`, `free_frame()` → `<kernel/pmm.h>`
-  - reads regions from `<kernel/boot.h>` (`g_boot_info`); reserves the kernel's own range using
-    the `_kernel_start`/`_kernel_end` symbols from `kernel/arch/i386/linker.ld`
+[x] Parse multiboot memory map to find available RAM
+[x] Bitmap or stack-based frame allocator
+[x] `alloc_frame()` / `free_frame()` for 4K physical pages
 
 **2.2 — Kernel Heap (malloc/free)**
-- Simple allocator on top of the frame allocator (e.g. linked-list first-fit or dlmalloc-style)
-- Implement `kmalloc()`, `kfree()`, `krealloc()`
-- Add `malloc`/`free` to libc
-- **Files:**
-  - `kernel/mm/heap.c` — `kmalloc`/`kfree`/`krealloc` (+ optional early bump allocator)
-  - `kernel/include/kernel/heap.h` — prototypes → `<kernel/heap.h>`
-  - libc bridge (optional): `libc/stdlib/malloc.c` forwarding `malloc`/`free` → `kmalloc`/`kfree`
-    under `#ifdef __is_libk`; declarations go in the existing `libc/include/stdlib.h`
+[x] Simple allocator on top of the frame allocator (e.g. linked-list first-fit or dlmalloc-style)
+[x] Implement `kmalloc()`, `kfree()`, `krealloc()`
+[x] Add `malloc`/`free` to libc
 
 **2.3 — Virtual Memory Manager**
-- Page directory/table management functions
-- `map_page()` / `unmap_page()` for kernel and (later) user space
-- Page fault handler that can grow the heap or report errors
-- **Files:**
-  - `kernel/mm/vmm.c` — `map_page`/`unmap_page` + recursive-mapping setup
-  - `kernel/include/kernel/vmm.h` — prototypes → `<kernel/vmm.h>`
-  - page-fault handler (vector 14): register the C handler via the existing ISR dispatch
-    (`register_interrupt_handler` in `libc/sys/isr.c`; stubs in `kernel/include/kernel/interrupt.S`)
-    — the handler body can live in `vmm.c`
+[x] Page directory/table management functions
+[x] `map_page()` / `unmap_page()` for kernel and (later) user space
+[x] Page fault handler that can grow the heap or report errors
 
 ---
 
@@ -225,34 +185,47 @@ Required before you can build anything dynamic (buffers, filesystem caches, proc
 Persistent storage so the OS can actually do something useful.
 
 **3.1 — ATA/IDE Disk Driver**
-- PIO-mode ATA driver (ports 0x1F0-0x1F7)
-- `ata_read_sector()` / `ata_write_sector()` for 512-byte sectors
-- Identify drive command to detect attached disks
-- **Files:**
-  - `kernel/drivers/ata/ata.c` — polling PIO driver; uses `<sys/io.h>` for port access
-  - `kernel/include/kernel/ata.h` — `ata_identify()`, `ata_read_sector()`, `ata_write_sector()` → `<kernel/ata.h>`
-  - build/test: add a `disk.img` (FAT16, made with `mkfs.fat`/`mtools`) and attach it in the
-    `run`/`debug` targets via `-drive file=disk.img,format=raw,if=ide`
+[x] PIO-mode ATA driver (ports 0x1F0-0x1F7)
+[x] `ata_read_sector()` / `ata_write_sector()` for 512-byte sectors
+[x] Identify drive command to detect attached disks
 
 **3.2 — Simple Filesystem (FAT16 or custom)**
-- Start with a simple flat filesystem or FAT16 (well-documented, easy to create images)
-- Core operations: `open`, `read`, `write`, `close`, `readdir`
-- VFS (Virtual Filesystem) layer so you can swap implementations later
-- Mount a disk image at boot
-- **Files:**
-  - `kernel/fs/vfs.c` + `kernel/include/kernel/vfs.h` — the node/ops abstraction → `<kernel/vfs.h>` (build this first)
-  - `kernel/fs/fat16/fat16.c` + `kernel/include/kernel/fat16.h` — FAT16 backend behind the VFS → `<kernel/fat16.h>`
-  - depends on `<kernel/ata.h>` (disk I/O) and `<kernel/heap.h>` (buffers / sector cache)
+[x] Start with a simple flat filesystem or FAT16 (well-documented, easy to create images)
+[x] Core operations: `open`, `read`, `write`, `close`, `readdir`
+[x] VFS (Virtual Filesystem) layer so you can swap implementations later
+[x] Mount a disk image at boot
 
 **3.3 — Shell Filesystem Commands**
-- `ls` — list files
-- `cat` — print file contents
-- `write` — write text to a file
-- `mkdir` — create directory (if using a hierarchical FS)
-- `rm` — delete file
+[x] `ls` — list files
+[x] `cat` — print file contents
+[x] `write` — write text to a file
+[x] `mkdir` — create directory (if using a hierarchical FS)
+[x] `rm` — delete file
+
+**3.4 — Hierarchical Filesystem (subdirectories & paths)**
+Everything through 3.3 is flat / root-only. This makes FAT16 properly hierarchical.
+Build in dependency order — the cluster-aware walk underpins everything else.
+
+[ ] Cluster-aware directory walk — `readdir`/`finddir`/`create` must handle **both** the root
+    (fixed region at `fs.root_start`) **and** subdirectories (cluster chains from the directory's
+    start cluster). Factor the root-only walk into one "iterate a directory's entries" helper that
+    branches root-vs-chain internally, so the three functions stop hardcoding the root region.
+[ ] `mkdir` — allocate a cluster, initialize it with `.` (self) and `..` (parent) entries, zero the
+    rest of the cluster, then add a directory entry (attr `0x10`) in the parent. The `.`/`..` links
+    are the new concept — every directory but the root starts with self + parent.
+[ ] Path resolution — split a path on `/` and resolve component-by-component via `finddir`, starting
+    from the root (absolute path) or the cwd (relative). Fail if a component is missing or isn't a
+    directory.
+[ ] Current working directory — the shell tracks a `cwd` node (plus a path string for the prompt);
+    `.`/`..` resolve through the entries `mkdir` writes.
+[ ] `cd <path>` command, and make `ls`/`cat`/`write`/`rm`/`mkdir` accept a **path** (resolve it first)
+    instead of a bare root-level name.
 - **Files:**
-  - extend the existing `kernel/kernel/shell.c` — add `ls`/`cat`/`write`/`mkdir`/`rm` rows to the
-    command table; each handler calls into `<kernel/vfs.h>` (no new module needed)
+  - `kernel/fs/fat16/fat16.c` — cluster-aware directory walk (root vs. chain); `fat16_mkdir`
+    (or `create` with `VFS_DIRECTORY`: `.`/`..` init + parent entry)
+  - `kernel/fs/vfs.c` + `<kernel/vfs.h>` — a path resolver (e.g. `vfs_resolve(path)` walking
+    components via `finddir`); optional `vfs_mkdir` dispatcher
+  - `kernel/kernel/shell.c` — `cd` command, a `cwd` node, and path-aware `ls`/`cat`/`write`/`rm`/`mkdir`
 
 ---
 

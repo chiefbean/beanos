@@ -88,7 +88,21 @@ char *exception_messages[] = {
 };
 
 void isr_handler(registers_t r) {
-    printf("received interrupt: %d %s\n", r.int_no, exception_messages[r.int_no]);
+    if (r.int_no <= 31) {
+        printf("\nreceived interrupt: %d %s", r.int_no, exception_messages[r.int_no]);
+
+        if (r.int_no == 14) {
+            uint32_t cr2_val;
+            __asm__ __volatile__ ("mov %%cr2, %0":"=r" (cr2_val)::);
+            printf("\nCR2: %x", cr2_val);
+            __asm__ __volatile__("cli");
+            for(;;) {
+                __asm__ __volatile__("hlt");
+            }
+        }
+    } else {
+        printf("\nreceived interrupt: %d", r.int_no);
+    }
 }
 
 void register_interrupt_handler(uint8_t n, isr_t handler)

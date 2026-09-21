@@ -5,7 +5,8 @@
 #include <stddef.h>
 
 #define KERNEL_VIRT_BASE 0xC0000000
-#define PHYS_TO_VIRT(p) (p + KERNEL_VIRT_BASE)
+#define PHYS_TO_VIRT(p) (uintptr_t)(p + KERNEL_VIRT_BASE)
+#define VIRT_TO_PHYS(v) ((uintptr_t)(v) - KERNEL_VIRT_BASE)
 
 typedef struct {
     uint64_t base;

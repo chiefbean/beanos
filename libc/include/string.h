@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define toupper(c) (c >= 'a' && c <= 'z' ? c - 32 : c)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,6 +22,9 @@ int atoi(char* value);
 char* substr(char* src, size_t start, size_t len, char* dst);
 int strtok(char* string, char tok, char** dst);
 int strcmp(char* a, char* b);
+char* strcpy(char* dst, const char* src);
+char* strncpy(char* dst, const char* src, size_t n);
+size_t strlcpy(char* dst, const char* src, size_t n);
 
 #ifdef __cplusplus
 }

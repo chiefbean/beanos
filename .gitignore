@@ -3,3 +3,7 @@ Makefile.old
 *.o
 *.d
 sysroot
+disk.img
+test.txt
+compile_commands.json
+.cache

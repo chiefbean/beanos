@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <kernel/tty.h>
+#include <kernel/vfs.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,6 +18,13 @@ void add(int argc, char** argv);
 void cmd_tick(int argc, char** argv);
 void clear(int argc, char** argv);
 void reboot(int argc, char** argv);
+void ls(int argc, char** argv);
+void cat(int argc, char** argv);
+void write(int argc, char** argv);
+void mkdir(int argc, char** argv);
+void rm(int argc, char** argv);
+void cd(int argc, char** argv);
+void cwd(int argc, char** argv);
 
 typedef void (*cmd_fn)(int, char**);
 
@@ -25,6 +33,9 @@ typedef struct {
     cmd_fn handler;
     const char* help;
 } cmd_t;
+
+extern vfs_node_t* cwd_node;
+extern char* cwd_str;
 
 #ifdef __cplusplus
 }

@@ -31,7 +31,6 @@
 extern "C" {
 #endif
 
-void enable_paging();
 void sendEOI(unsigned char irq);
 void initPIC(int offset1, int offset2);
 void IRQ_set_mask(unsigned char IRQline);

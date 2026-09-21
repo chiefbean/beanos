@@ -37,10 +37,10 @@ sys/irq.o \
 sys/gdt.o \
 sys/timer.o \
 sys/keyboard.o \
-kernel/paging.o \
 kernel/pic.o \
 stdio/stdio.o \
 stdlib/abort.o \
+stdlib/malloc.o \
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \

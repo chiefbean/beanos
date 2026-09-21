@@ -28,7 +28,7 @@ CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
-KERNEL_OBJS=kernel/kernel.o include/kernel/interrupt.o include/kernel/gdt.o include/kernel/irq.o include/kernel/paging.o kernel/shell.o
+KERNEL_OBJS=kernel/kernel.o include/kernel/interrupt.o include/kernel/gdt.o include/kernel/irq.o kernel/shell.o mm/pmm.o mm/vmm.o mm/heap.o drivers/ata/ata.o fs/vfs.o fs/fat16/fat16.o
 KERNEL_OBJS:=$(KERNEL_OBJS) $(KERNEL_ARCH_OBJS)
 
 
